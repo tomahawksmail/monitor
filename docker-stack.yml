@@ -4,7 +4,7 @@ services:
   monitor_server:
     image: monitor-server:1.0
     deploy:
-      replicas: 1
+      replicas: 4
       restart_policy:
         condition: on-failure
       resources:
