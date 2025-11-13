@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Screenshot Directory Viewer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <script>
+        async function updateGauge() {
+            const res = await fetch("/data");
+            const data = await res.json();
+
+            document.getElementById("percent").textContent = data.percent + "%";
+            document.getElementById("used").textContent = data.used + " GB";
+            document.getElementById("free").textContent = data.free + " GB";
+            document.getElementById("total").textContent = data.total + " GB";
+
+            const circle = document.querySelector(".circle");
+            circle.style.background = `conic-gradient(#0077cc ${data.percent}%, #eee ${data.percent}%)`;
+        }
+
+        setInterval(updateGauge, 60000);
+        window.onload = updateGauge;
+    </script>
+</head>
+<body>
+<h2>📁 Screenshot Directory Viewer</h2>
+
+{% for host, info in data.items() %}
+<details class="level-0">
+    <summary>
+        🖥️ {{ host }}
+        <span class="host-total">
+                    | Total: {{ info.total_files }} files — {{ info.total_size }}
+                </span>
+    </summary>
+
+    {% for date, d in info.dates.items() %}
+    <details class="level-1">
+        <summary class="date-summary">
+            📅 {{ date }} — {{ d.count }} files ({{ d.size }})
+        </summary>
+        <ul class="level-2">
+            {% for file in d.files %}
+            <li class="file level-3">🖼️ {{ file }}</li>
+            {% endfor %}
+        </ul>
+    </details>
+    {% endfor %}
+</details>
+{% endfor %}
+
+<div class="info">
+    💾 <strong>Total:</strong> {{ grand_total_files }} size,
+    {{ sum }} MB
+</div>
+
+<hr>
+<div class="footer">
+
+<div class="gauge">
+    <div class="progress-container">
+        <div class="progress-bar" style="width: {{ info.percent }}%;"> Disk Usage {{ info.percent }}%</div>
+    </div>
+</div>
+    <p><strong>Total:</strong> <span id="total">{{ info.total }} GB</span> / <strong>Used:</strong> <span id="used">{{ info.used }} GB</span> / <strong>Free:</strong> <span id="free">{{ info.free }} GB</span></p>
+</div>
+</body>
+</html>
