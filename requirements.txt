@@ -1,6 +1,6 @@
 Flask==3.1.2
 certifi==2024.8.30
-Jinja2==3.1.4
+Jinja2==3.1.6
 psutil==6.1.0
-python-dotenv==1.0.1
+python-dotenv==1.2.1
 gunicorn==23.0.0
