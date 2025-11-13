@@ -1,16 +1,21 @@
 from flask import Flask, request, jsonify, render_template
 from pathlib import Path
 import shutil
-
+import platform
 app = Flask(__name__)
 
-# Directory to store screenshots
-BASE_DIR = Path(r"C:\Users\admin.AD\PycharmProjects\test\screenshots")
-BASE_DIR.mkdir(exist_ok=True)
-path = r"C:\Users\admin.AD\PycharmProjects\test\screenshots"
+if platform.system() == "Windows":
+    # Local development path
+    BASE_DIR = Path(r"C:\Users\admin.AD\PycharmProjects\test\screenshots")
+else:
+    # Linux / Docker path
+    BASE_DIR = Path("/app/screenshots")
+
+BASE_DIR.mkdir(parents=True, exist_ok=True)
+
 # How long to keep screenshots (in minutes)
 RETENTION_MINUTES = 5
-
+host = platform.uname()[1]
 
 def get_folder_size(files):
     """Return total size (MB) of all given files."""
@@ -52,7 +57,7 @@ def index():
 
 
 
-        return render_template("index.html", data=data, sum=round(sum, 2), info=info)
+        return render_template("index.html", data=data, sum=round(sum, 2), info=info, host=host)
 
 
 

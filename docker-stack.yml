@@ -22,4 +22,5 @@ volumes:
     driver_opts:
       type: "nfs"
       o: "addr=192.168.17.220,rw"
-      device: ":/mnt/nfs/shared/monitor"
+      device: ":/mnt/nfs/shared/monitor/screenshots"
+
