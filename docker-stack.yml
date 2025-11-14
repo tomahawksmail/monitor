@@ -16,8 +16,8 @@ services:
         published: 5566
         protocol: tcp
         mode: ingress
-      - target: 5543
-        published: 5543
+      - target: 5566
+        published: 5566
         protocol: tcp
         mode: ingress
 
