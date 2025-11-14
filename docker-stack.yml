@@ -19,15 +19,14 @@ services:
         published: 5566
         protocol: tcp
         mode: ingress
-
     volumes:
-      - monitor_data:/app/screenshots
+      - /mnt/nfs/shared/monitor:/app/screenshots
 
-volumes:
-  monitor_data:
-    driver: local
-    driver_opts:
-      type: "nfs"
-      o: "addr=192.168.17.220,rw"
-      device: ":/mnt/nfs/shared/monitor"
+#volumes:
+#  monitor_data:
+#    driver: local
+#    driver_opts:
+#      type: "nfs"
+#      o: "addr=192.168.17.220,rw"
+#      device: ":/mnt/nfs/shared/monitor"
 
