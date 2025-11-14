@@ -1,3 +1,6 @@
+##########################################
+### Maksym Tsybulskyi 2025 uskoinc.com ###
+##########################################
 import time
 import requests
 import platform
