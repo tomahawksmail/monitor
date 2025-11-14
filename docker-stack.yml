@@ -4,7 +4,7 @@ services:
   monitor_server:
     image: dregistrygui.uskoinc.com/monitor-server:1.5
     deploy:
-      replicas: 1
+      replicas: 4
 #      placement:
 #        constraints:
 #          - node.hostname == masterswarm
