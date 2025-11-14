@@ -128,16 +128,12 @@ def login():
     else:
         return render_template('login.html')
 
-    # HTML form
-    # return redirect(url_for("login"))
 
 
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("login"))
-
-
 
 
 @app.route("/data")
