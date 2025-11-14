@@ -12,7 +12,15 @@ services:
           cpus: "1.0"
           memory: 512M
     ports:
-      - "5566:5566"
+      - target: 5566
+        published: 5566
+        protocol: tcp
+        mode: ingress
+      - target: 5543
+        published: 5543
+        protocol: tcp
+        mode: ingress
+
     volumes:
       - monitor_data:/app/screenshots
 

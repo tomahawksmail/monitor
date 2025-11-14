@@ -1,5 +1,4 @@
 FROM python:3.9-slim
-# Set timezone environment variable
 ENV TZ=America/Los_Angeles
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
