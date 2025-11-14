@@ -102,3 +102,19 @@ li.file:hover {
     border-radius: 25px 0 0 25px; /* rounded left end */
     transition: width 0.4s ease-in-out;
 }
+.logout-button {
+    padding: 6px 14px;
+    background-color: #0077cc;
+    color: white;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.3s ease;
+}
+
+.logout-button:hover {
+    background-color: #005fa3;
+}

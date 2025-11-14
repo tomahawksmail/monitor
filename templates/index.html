@@ -25,7 +25,11 @@
     </script>
 </head>
 <body>
-<h2>📁 Screenshot Directory Viewer</h2>
+<h2 style="display: flex; justify-content: space-between; align-items: center;">
+    📁 Screenshot Directory Viewer
+    <a href="{{ url_for('logout') }}" class="logout-button">🔒 Logout</a>
+</h2>
+
 
 {% for host, info in data.items() %}
 <details class="level-0">
@@ -39,7 +43,7 @@
     {% for date, d in info.dates.items() %}
     <details class="level-1">
         <summary class="date-summary">
-            📅 {{ date }} — {{ d.count }} files ({{ d.size }})
+            📅 {{ date }} — {{ d.count }} files ({{ d.size }}) --- link
         </summary>
         <ul class="level-2">
             {% for file in d.files %}

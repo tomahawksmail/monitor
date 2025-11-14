@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Login</title>
+
+<style>
+    body {
+        font-family: "Segoe UI", Roboto, Consolas, monospace;
+        background-color: #f9f9fb;
+        color: #222;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+
+    .login-container {
+        background: white;
+        width: 380px;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+        text-align: center;
+        border-top: 5px solid #0077cc;
+    }
+
+    .login-container h2 {
+        font-weight: 600;
+        margin-bottom: 25px;
+        color: #1a1a1a;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+        text-align: left;
+    }
+
+    label {
+        font-size: 14px;
+        color: #444;
+        font-weight: 600;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        margin-top: 6px;
+        background: #fafafa;
+        font-size: 15px;
+        transition: all 0.2s ease-in-out;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+        border-color: #0077cc;
+        background: #fff;
+        outline: none;
+        box-shadow: 0 0 5px rgba(0,119,204,0.25);
+    }
+
+    .login-button {
+        width: 100%;
+        padding: 12px;
+        margin-top: 10px;
+        background: linear-gradient(90deg, #0077cc, #00c6ff);
+        border: none;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: background 0.3s ease;
+    }
+
+    .login-button:hover {
+        background: linear-gradient(90deg, #006bb8, #00b8ee);
+    }
+
+    .login-footer {
+        margin-top: 20px;
+        font-size: 14px;
+        color: #777;
+    }
+</style>
+
+</head>
+<body>
+
+<div class="login-container">
+    <h2>Sign In</h2>
+
+    <form method="POST">
+
+        <div class="form-group">
+            <label>Username</label>
+            <input name="username" type="text" placeholder="Enter your username" required>
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input name="password" type="password" placeholder="Enter your password" required>
+        </div>
+
+        <button class="login-button" type="submit">Login</button>
+    </form>
+
+    <div class="login-footer">
+        Secure Access — Authorized Users Only
+    </div>
+</div>
+
+</body>
+</html>

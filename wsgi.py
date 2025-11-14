@@ -5,7 +5,7 @@
 from server import app
 
 host = '0.0.0.0'
-port = 5566
+port = 5568
 
 # run the app
 if __name__ == "__main__":
