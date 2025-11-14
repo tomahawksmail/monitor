@@ -5,12 +5,9 @@ import platform
 app = Flask(__name__)
 
 if platform.system() == "Windows":
-    # Local development path
     BASE_DIR = Path(r"C:\Users\admin.AD\PycharmProjects\test\screenshots")
 else:
-    # Linux / Docker path
     BASE_DIR = Path("/app/screenshots")
-
 BASE_DIR.mkdir(parents=True, exist_ok=True)
 
 # How long to keep screenshots (in minutes)
@@ -103,7 +100,3 @@ def get_space():
         "percent": percent
     }
 
-
-# if __name__ == "__main__":
-#
-#     app.run(host="0.0.0.0", port=5003)
