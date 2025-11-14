@@ -16,10 +16,6 @@ services:
         published: 5566
         protocol: tcp
         mode: ingress
-      - target: 5566
-        published: 5566
-        protocol: tcp
-        mode: ingress
 
     volumes:
       - monitor_data:/app/screenshots
