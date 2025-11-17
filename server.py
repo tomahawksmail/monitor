@@ -1,15 +1,16 @@
-from flask import Flask, request, jsonify, render_template, redirect, url_for, session
-from ldap3 import Server, Connection, NTLM, ALL
+from flask import Flask, request, jsonify, render_template, flash, redirect, url_for, session
 import secrets
 from pathlib import Path
 import os
 from dotenv import load_dotenv
 import shutil
 import platform
+load_dotenv()
+from ldap_utils import ldap_auth, is_user_in_group
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(16))
-load_dotenv()
+
 
 host = platform.uname()[1]
 
@@ -29,111 +30,6 @@ LDAP_GROUP_DN = "CN=Allow-Monitor,OU=CA_Office_Users,DC=ad,DC=uskoinc,DC=com"
 
 
 
-def user_dn(username):
-
-    """Convert 'jdoe' into full DN using service account"""
-    server = Server(DOMAIN_CONTROLLER, get_info=ALL)
-
-    try:
-        conn = Connection(server,
-                          user=SERVICE_USER,
-                          password=SERVICE_PASS,
-                          authentication=NTLM,
-                          auto_bind=True)
-        print("User DN:", conn.entries)
-        conn.search(
-            search_base="DC=ad,DC=uskoinc,DC=com",
-            search_filter=f"(sAMAccountName={username})",
-            attributes=["distinguishedName"]
-        )
-
-        if conn.entries:
-            return conn.entries[0].distinguishedName.value
-
-    except Exception as e:
-        print("DN lookup failed:", e)
-
-    return None
-
-
-
-
-def ldap_auth(username, password):
-    """Check if credentials are valid"""
-    server = Server(DOMAIN_CONTROLLER)
-
-    # Need full domain\user for NTLM
-    user_ntlm = f"ad\\{username}"
-
-    try:
-        conn = Connection(server,
-                          user=user_ntlm,
-                          password=password,
-                          authentication=NTLM)
-        return conn.bind()
-    except Exception:
-        return False
-
-
-def is_user_in_group(username):
-    print("=== GROUP CHECK START ===")
-    print("Username:", username)
-
-    dn = user_dn(username)
-    print("User DN returned:", dn)
-
-    if not dn:
-        print("❌ No DN found for user")
-        return False
-
-    print("SERVICE_USER:", SERVICE_USER)
-    print("SERVICE_PASS length:", len(SERVICE_PASS))
-    print("DOMAIN_CONTROLLER:", DOMAIN_CONTROLLER)
-    print("LDAP_GROUP_DN:", LDAP_GROUP_DN)
-
-    server = Server(DOMAIN_CONTROLLER, get_info=ALL)
-
-    try:
-        conn = Connection(server,
-                          user=SERVICE_USER,
-                          password=SERVICE_PASS,
-                          authentication=NTLM,
-                          auto_bind=True)
-
-        print("✔ Service account bind OK")
-
-        conn.search(
-            search_base=dn,
-            search_filter="(objectClass=*)",
-            attributes=["memberOf"]
-        )
-
-        if not conn.entries:
-            print("❌ No entries returned for user")
-            return False
-
-        member_of = conn.entries[0]["memberOf"]
-        print("User memberOf groups RAW:", member_of)
-
-        member_of_lower = [g.lower() for g in member_of]
-        print("User groups lowercase:", member_of_lower)
-
-        print("Looking for group:", LDAP_GROUP_DN.lower())
-
-        result = LDAP_GROUP_DN.lower() in member_of_lower
-        print("Membership result:", result)
-
-        print("=== GROUP CHECK END ===")
-
-        return result
-
-    except Exception as e:
-        print("❌ GROUP LOOKUP FAILED:", e)
-        return False
-
-
-
-
 
 @app.route("/")
 def home():
@@ -148,22 +44,21 @@ def login():
         username = request.form["username"].strip()
         password = request.form["password"].strip()
 
-        print("LOGIN username:", username)
-        print("LOGIN password length:", len(password))
-
         # LDAP auth
         if not ldap_auth(username, password):
-            return "Invalid username/password", 401
+            flash("Invalid username/password")
+            return redirect(url_for("login"))
 
         # Group check
         if not is_user_in_group(username):
-            print(username)
-            return "You are not allowed to access this system.", 403
+            flash("You are not allowed to access this system.")
+            return redirect(url_for("login"))
 
         session["username"] = username
         return redirect(url_for("index"))
     else:
         return render_template('login.html')
+
 
 
 
