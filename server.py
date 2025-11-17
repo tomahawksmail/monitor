@@ -21,15 +21,6 @@ else:
     BASE_DIR = Path("/app/screenshots")
     BASE_DIR.mkdir(parents=True, exist_ok=True)
 
-# ===== LDAP CONFIG =====
-DOMAIN_CONTROLLER = os.environ.get('DOMAIN_CONTROLLER')
-SERVICE_USER = os.environ.get('DCUSERNAME')
-SERVICE_PASS = os.environ.get('DCPASSWORD')
-LDAP_GROUP_DN = "CN=Allow-Monitor,OU=CA_Office_Users,DC=ad,DC=uskoinc,DC=com"
-
-
-
-
 
 @app.route("/")
 def home():

@@ -1,46 +1,54 @@
-import cv2
+from moviepy import ImageSequenceClip
+from pathlib import Path
 import os
 import platform
-from pathlib import Path
-from datetime import datetime
 
-# ==== CONFIGURATION ====
+
 if platform.system() == "Windows":
     BASE_DIR = Path(r"C:\Users\admin.AD\PycharmProjects\test\screenshots")
+    separator = "\\"
 else:
     BASE_DIR = Path("/app/screenshots")
-VIDEO_FPS = 10
-VIDEO_CODEC = 'mp4v'
+    BASE_DIR.mkdir(parents=True, exist_ok=True)
+    separator = "/"
 
-def create_videos_for_all_dirs():
-    # Loop through all subdirectories (PC + date folders)
-    for subdir in BASE_DIR.iterdir():
-        if subdir.is_dir():
-            images = sorted(subdir.glob("*.png"))
-            if not images:
-                continue  # skip empty directories
+for host_dir in BASE_DIR.iterdir():
+    if host_dir.is_dir():
+        for date_dir in host_dir.iterdir():
+            if date_dir.is_dir():
+                name = str(date_dir).split(separator)[-1]
 
-            # Get first image to determine size
-            first_image = cv2.imread(str(images[0]))
-            height, width, _ = first_image.shape
+                print(f"Found Directory: {date_dir}")
+                print("_____________________________")
 
-            # Create video filename: include PC name and date from folder
-            video_filename = BASE_DIR / f"{subdir.name}.mp4"
+                images = sorted(date_dir.glob("*.jpg"))
 
-            fourcc = cv2.VideoWriter_fourcc(*VIDEO_CODEC)
-            video_writer = cv2.VideoWriter(str(video_filename), fourcc, VIDEO_FPS, (width, height))
+                if not images:
+                    print(f"No images found in {date_dir}, skipping...")
+                    continue  # Skip empty folders
 
-            for img_path in images:
-                img = cv2.imread(str(img_path))
-                video_writer.write(img)
+                # Convert Path objects to strings
+                image_files = [str(img) for img in images]
+                print("Images:", image_files)
 
-            video_writer.release()
-            print(f"Video created: {video_filename}")
+                # Create video clip, fps=1 means 1 frame per second
+                clip = ImageSequenceClip(image_files, fps=1)
 
-            # Delete original screenshots
-            for img_path in images:
-                img_path.unlink()
-            print(f"Deleted {len(images)} screenshots from {subdir.name}")
+                # Output video file path
+                video_path = date_dir / f"{name}.mp4"
 
-if __name__ == "__main__":
-    create_videos_for_all_dirs()
+                # Write video file
+                clip.write_videofile(str(video_path), codec="libx264")
+
+                print("✅ Video created at:", video_path)
+
+                for file in image_files:
+                    path = Path(file)
+                    if path.exists():
+                        path.unlink()
+                        print("Deleted:", path)
+                    else:
+                        print("Not found:", path)
+
+
+
