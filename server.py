@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for, session
 from ldap3 import Server, Connection, NTLM, ALL
+import secrets
 from pathlib import Path
 import os
 from dotenv import load_dotenv
@@ -7,10 +8,9 @@ import shutil
 import platform
 
 app = Flask(__name__)
-
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(16))
 load_dotenv()
 
-app.secret_key = os.environ.get('SECRET') or "super-secret-key"
 host = platform.uname()[1]
 
 
@@ -22,12 +22,15 @@ else:
 
 # ===== LDAP CONFIG =====
 DOMAIN_CONTROLLER = os.environ.get('DOMAIN_CONTROLLER')
-SERVICE_USER = os.environ.get('DCUSERNAME')  # service account
+SERVICE_USER = os.environ.get('DCUSERNAME')
 SERVICE_PASS = os.environ.get('DCPASSWORD')
 LDAP_GROUP_DN = "CN=Allow-Monitor,OU=CA_Office_Users,DC=ad,DC=uskoinc,DC=com"
 
 
+
+
 def user_dn(username):
+
     """Convert 'jdoe' into full DN using service account"""
     server = Server(DOMAIN_CONTROLLER, get_info=ALL)
 
@@ -37,7 +40,7 @@ def user_dn(username):
                           password=SERVICE_PASS,
                           authentication=NTLM,
                           auto_bind=True)
-
+        print("User DN:", conn.entries)
         conn.search(
             search_base="DC=ad,DC=uskoinc,DC=com",
             search_filter=f"(sAMAccountName={username})",
@@ -73,10 +76,20 @@ def ldap_auth(username, password):
 
 
 def is_user_in_group(username):
-    """Check if user belongs to Allow-Monitor group"""
+    print("=== GROUP CHECK START ===")
+    print("Username:", username)
+
     dn = user_dn(username)
+    print("User DN returned:", dn)
+
     if not dn:
+        print("❌ No DN found for user")
         return False
+
+    print("SERVICE_USER:", SERVICE_USER)
+    print("SERVICE_PASS length:", len(SERVICE_PASS))
+    print("DOMAIN_CONTROLLER:", DOMAIN_CONTROLLER)
+    print("LDAP_GROUP_DN:", LDAP_GROUP_DN)
 
     server = Server(DOMAIN_CONTROLLER, get_info=ALL)
 
@@ -87,17 +100,37 @@ def is_user_in_group(username):
                           authentication=NTLM,
                           auto_bind=True)
 
+        print("✔ Service account bind OK")
+
         conn.search(
-            search_base=LDAP_GROUP_DN,
-            search_filter=f"(member={dn})",
-            attributes=["cn"]
+            search_base=dn,
+            search_filter="(objectClass=*)",
+            attributes=["memberOf"]
         )
 
-        return len(conn.entries) > 0
+        if not conn.entries:
+            print("❌ No entries returned for user")
+            return False
+
+        member_of = conn.entries[0]["memberOf"]
+        print("User memberOf groups RAW:", member_of)
+
+        member_of_lower = [g.lower() for g in member_of]
+        print("User groups lowercase:", member_of_lower)
+
+        print("Looking for group:", LDAP_GROUP_DN.lower())
+
+        result = LDAP_GROUP_DN.lower() in member_of_lower
+        print("Membership result:", result)
+
+        print("=== GROUP CHECK END ===")
+
+        return result
 
     except Exception as e:
-        print("Group lookup failed:", e)
+        print("❌ GROUP LOOKUP FAILED:", e)
         return False
+
 
 
 
@@ -115,12 +148,16 @@ def login():
         username = request.form["username"].strip()
         password = request.form["password"].strip()
 
+        print("LOGIN username:", username)
+        print("LOGIN password length:", len(password))
+
         # LDAP auth
         if not ldap_auth(username, password):
             return "Invalid username/password", 401
 
         # Group check
         if not is_user_in_group(username):
+            print(username)
             return "You are not allowed to access this system.", 403
 
         session["username"] = username
