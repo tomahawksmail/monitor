@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, flash, redirect, url_for, session
+from flask import Flask, request, jsonify, render_template, flash, redirect, url_for, session, send_file
 import secrets
 from pathlib import Path
 import os
@@ -51,6 +51,12 @@ def login():
         return render_template('login.html')
 
 
+@app.route("/download/<host>/<date>/<filename>")
+def download_file(host, date, filename):
+    file_path = BASE_DIR / host / date / filename
+    if file_path.exists():
+        return send_file(file_path, as_attachment=True)
+    return "File not found", 404
 
 
 @app.route("/logout")

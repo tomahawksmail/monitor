@@ -24,7 +24,7 @@ else:
 
 # Load settings
 load_dotenv()
-SERVER_URL = os.environ.get('API_URL')  # e.g. http://192.168.11.79:5566/upload
+SERVER_URL = os.environ.get('API_URL')
 print("Using API:", SERVER_URL)
 
 INTERVAL = int(os.environ.get('FREQUENCY', 5))

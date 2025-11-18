@@ -49,35 +49,36 @@
     <!-- Screenshots -->
     <details class="level-1">
         <summary class="date-summary">
-            📅 {{ date }} — {{ d.screens.count }} captured files ({{ d.screens.size }})
-            ▶️  ({{ d.videos.size }})
+            📅 {{ date }} —————
+            🖼️ {{ d.screens.count }} captured files ({{ d.screens.size }}) /
+            ▶️ {{ d.videos.count }} video files {{ d.videos.size }} /
+            📦 {% set total_size = (d.videos.size.split(' ')[0]|float + d.screens.size.split(' ')[0]|float) %}
+            Total: {{ "%.2f"|format(total_size) }} MB
+
         </summary>
+        <!--        <ul class="level-2">-->
+        <!--            {% for file in d.screens.files %}-->
+        <!--            <li class="file">🖼️ {{ file }}</li>-->
+        <!--            {% endfor %}-->
+
+        <!--            {% for file in d.videos.files %}-->
+        <!--            <li class="file">🎞️ {{ file }}</li>-->
+        <!--            {% endfor %}-->
+        <!--        </ul>-->
         <ul class="level-2">
             {% for file in d.screens.files %}
-            <li class="file">🖼️ {{ file }}</li>
+            <li class="file">
+                🖼️ <a href="{{ url_for('download_file', host=host, date=date, filename=file) }}">{{ file }}</a>
+            </li>
             {% endfor %}
 
             {% for file in d.videos.files %}
-            <li class="file">🎞️ {{ file }}</li>
-
-
-
+            <li class="file">
+                🎞️ <a href="{{ url_for('download_file', host=host, date=date, filename=file) }}">{{ file }}</a>
+            </li>
             {% endfor %}
         </ul>
     </details>
-
-<!--    &lt;!&ndash; Videos &ndash;&gt;-->
-<!--    <details class="level-1">-->
-<!--        <summary class="date-summary">-->
-<!--            ▶️ {{ date }} — {{ d.videos.count }} video file(s) ({{ d.videos.size }})-->
-<!--        </summary>-->
-<!--        <ul class="level-2">-->
-<!--            {% for file in d.videos.files %}-->
-<!--            <li class="file">🎞️ {{ file }}</li>-->
-<!--            {% endfor %}-->
-<!--        </ul>-->
-<!--    </details>-->
-
     {% endfor %}
 </details>
 {% endfor %}
