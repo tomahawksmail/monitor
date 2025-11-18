@@ -1,7 +1,8 @@
 from moviepy import ImageSequenceClip
 from pathlib import Path
 import platform
-
+import time
+from server import TTL
 
 if platform.system() == "Windows":
     BASE_DIR = Path(r"C:\Users\admin.AD\PycharmProjects\test\screenshots")
@@ -49,7 +50,22 @@ for host_dir in BASE_DIR.iterdir():
                         print("Deleted:", path)
                     else:
                         print("Not found:", path)
+
 ### Delete old video files ###
+for mp4_file in BASE_DIR.rglob("*.mp4"):
+    print(mp4_file.resolve())  # prints full absolute path
+now = time.time()
+max_age_seconds = int(TTL) * 24 * 60 * 60  # 3 days
+for old_video in date_dir.glob("*.mp4"):
+    if old_video.exists():
+
+        mtime = old_video.stat().st_mtime
+        age = now - mtime
+        if age > max_age_seconds:
+            # old_video.unlink()
+            print("Deleted old video:", old_video)
+
+
 
 
 

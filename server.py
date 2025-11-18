@@ -5,7 +5,9 @@ import os
 from dotenv import load_dotenv
 import shutil
 import platform
+
 load_dotenv()
+TTL=os.environ.get("TTLVIDEO")
 from ldap_utils import ldap_auth, is_user_in_group
 
 app = Flask(__name__)
