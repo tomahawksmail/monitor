@@ -54,17 +54,8 @@
             ▶️ {{ d.videos.count }} video files {{ d.videos.size }} /
             📦 {% set total_size = (d.videos.size.split(' ')[0]|float + d.screens.size.split(' ')[0]|float) %}
             Total: {{ "%.2f"|format(total_size) }} MB
-
         </summary>
-        <!--        <ul class="level-2">-->
-        <!--            {% for file in d.screens.files %}-->
-        <!--            <li class="file">🖼️ {{ file }}</li>-->
-        <!--            {% endfor %}-->
 
-        <!--            {% for file in d.videos.files %}-->
-        <!--            <li class="file">🎞️ {{ file }}</li>-->
-        <!--            {% endfor %}-->
-        <!--        </ul>-->
         <ul class="level-2">
             {% for file in d.screens.files %}
             <li class="file">
