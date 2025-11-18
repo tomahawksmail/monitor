@@ -33,46 +33,48 @@
 
 
 <!-- ====================== HOST LOOP ====================== -->
-{% for host, info in data.items() %}
+{% for host, host_dates in data.items() %}
 <details class="level-0">
     <summary>
         🖥️ {{ host }}
-        <span class="host-total">
-            | Screenshots Total: {{ info.total_screenshots_size }}
-            | Videos Total: {{ info.total_video_size }}
-        </span>
     </summary>
 
-    <!-- ====================== DATE LOOP ====================== -->
-    {% for date, d in info.dates.items() %}
-
-    <!-- Screenshots -->
+    {% for date, users in host_dates.items() %}
     <details class="level-1">
-        <summary class="date-summary">
-            📅 {{ date }} —————
-            🖼️ {{ d.screens.count }} captured files ({{ d.screens.size }}) /
-            ▶️ {{ d.videos.count }} video files {{ d.videos.size }} /
-            📦 {% set total_size = (d.videos.size.split(' ')[0]|float + d.screens.size.split(' ')[0]|float) %}
-            Total: {{ "%.2f"|format(total_size) }} MB
-        </summary>
+        <summary>📅 {{ date }}</summary>
 
-        <ul class="level-2">
-            {% for file in d.screens.files %}
-            <li class="file">
-                🖼️ <a href="{{ url_for('download_file', host=host, date=date, filename=file) }}">{{ file }}</a>
-            </li>
-            {% endfor %}
+        {% for user, d in users.items() %}
+        <details class="level-2">
+            <summary>👤 {{ user }} — 🖼️ {{ d.screens.count }} | 🎞️ {{ d.videos.count }}</summary>
 
-            {% for file in d.videos.files %}
-            <li class="file">
-                🎞️ <a href="{{ url_for('download_file', host=host, date=date, filename=file) }}">{{ file }}</a>
-            </li>
-            {% endfor %}
-        </ul>
+            <ul class="level-3">
+                <!-- IMAGES -->
+                {% for file in d.screens.files %}
+                <li>
+                    🖼️
+                    <a href="{{ url_for('download_file', host=host, date=date, user=user, filename=file) }}">
+                        {{ file }}
+                    </a>
+                </li>
+                {% endfor %}
+
+                <!-- VIDEOS -->
+                {% for file in d.videos.files %}
+                <li>
+                    🎞️
+                    <a href="{{ url_for('download_file', host=host, date=date, user=user, filename=file) }}">
+                        {{ file }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </details>
+        {% endfor %}
     </details>
     {% endfor %}
 </details>
 {% endfor %}
+
 
 
 <!-- ====================== FOOTER ====================== -->

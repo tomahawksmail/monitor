@@ -2,70 +2,110 @@ from moviepy import ImageSequenceClip
 from pathlib import Path
 import platform
 import time
-from server import TTL
+from server import TTL  # days to keep videos
 
+# Detect base path
 if platform.system() == "Windows":
     BASE_DIR = Path(r"C:\Users\admin.AD\PycharmProjects\test\screenshots")
-    separator = "\\"
 else:
     BASE_DIR = Path("/app/screenshots")
     BASE_DIR.mkdir(parents=True, exist_ok=True)
-    separator = "/"
 
-for host_dir in BASE_DIR.iterdir():
-    if host_dir.is_dir():
+TTL_SECONDS = int(TTL) * 24 * 60 * 60   # days → seconds
+
+
+# -------------------------------------------------------------
+#            CREATE VIDEO FOR ONE USER DIRECTORY
+# -------------------------------------------------------------
+def create_video_for_user(user_dir: Path):
+    """
+    Convert all JPG files inside a user directory into a video.
+    Example path: host/date/user/
+    """
+    user = user_dir.name
+    date = user_dir.parent.name
+    host = user_dir.parent.parent.name
+
+    images = sorted(user_dir.glob("*.jpg"))
+    if not images:
+        print(f"[SKIP] No JPGs in {user_dir}")
+        return
+
+    image_files = [str(img) for img in images]
+    print(f"[INFO] Creating video for {host}/{date}/{user} from {len(images)} images")
+
+    video_name = f"{date}-{user}.mp4"
+    video_path = user_dir / video_name
+
+    try:
+        clip = ImageSequenceClip(image_files, fps=1)
+        clip.write_videofile(str(video_path), codec="libx264")
+        print(f"✅ Video created: {video_path}")
+
+    except Exception as e:
+        print("❌ Error creating video:", e)
+        return
+
+    delete_images(images)
+
+
+# -------------------------------------------------------------
+#            DELETE ALL JPG FILES FOR A USER
+# -------------------------------------------------------------
+def delete_images(images):
+    for file in images:
+        try:
+            file.unlink()
+            print("🗑️ Deleted:", file)
+        except Exception as e:
+            print("❌ Error deleting:", file, e)
+
+
+# -------------------------------------------------------------
+#        DELETE OLD VIDEOS (older than TTL days)
+# -------------------------------------------------------------
+def delete_old_videos():
+    now = time.time()
+    print(f"\n=== Checking for old videos (TTL={TTL} days) ===")
+
+    for mp4 in BASE_DIR.rglob("*.mp4"):
+        age = now - mp4.stat().st_mtime
+
+        if age > TTL_SECONDS:
+            try:
+                mp4.unlink()
+                print(f"🗑️ Deleted old video: {mp4}")
+            except Exception as e:
+                print(f"❌ Could not delete {mp4}", e)
+
+
+# -------------------------------------------------------------
+#                   PROCESS ENTIRE TREE
+# -------------------------------------------------------------
+def process_all_hosts():
+    print("\n====== START PROCESSING ======\n")
+
+    for host_dir in BASE_DIR.iterdir():
+        if not host_dir.is_dir():
+            continue
+
+        print(f"\n📁 HOST: {host_dir.name}")
+
         for date_dir in host_dir.iterdir():
-            if date_dir.is_dir():
-                name = str(date_dir).split(separator)[-1]
+            if not date_dir.is_dir():
+                continue
 
-                print(f"Found Directory: {date_dir}")
-                print("_____________________________")
-### Creating videofiles ###
-                images = sorted(date_dir.glob("*.jpg"))
+            print(f"  📅 DATE: {date_dir.name}")
 
-                if not images:
-                    print(f"No images found in {date_dir}, skipping...")
-                    continue  # Skip empty folders
-
-                # Convert Path objects to strings
-                image_files = [str(img) for img in images]
-                print("Images:", image_files)
-
-                # Create video clip, fps=1 means 1 frame per second
-                clip = ImageSequenceClip(image_files, fps=1)
-
-                # Output video file path
-                video_path = date_dir / f"{name}.mp4"
-
-                # Write video file
-                clip.write_videofile(str(video_path), codec="libx264")
-
-                print("✅ Video created at:", video_path)
-
-### Delete all jpg files ####
-                for file in image_files:
-                    path = Path(file)
-                    if path.exists():
-                        path.unlink()
-                        print("Deleted:", path)
-                    else:
-                        print("Not found:", path)
-
-### Delete old video files ###
-for mp4_file in BASE_DIR.rglob("*.mp4"):
-    print(mp4_file.resolve())  # prints full absolute path
-now = time.time()
-max_age_seconds = int(TTL) * 24 * 60 * 60  # 3 days
-for old_video in date_dir.glob("*.mp4"):
-    if old_video.exists():
-
-        mtime = old_video.stat().st_mtime
-        age = now - mtime
-        if age > max_age_seconds:
-            # old_video.unlink()
-            print("Deleted old video:", old_video)
+            for user_dir in date_dir.iterdir():
+                if not user_dir.is_dir():
+                    continue
+                print(f"    👤 USER: {user_dir.name}")
+                create_video_for_user(user_dir)
+    delete_old_videos()
+    print("\n====== DONE ======\n")
 
 
-
-
-
+# -------------------------------------------------------------
+if __name__ == "__main__":
+    process_all_hosts()

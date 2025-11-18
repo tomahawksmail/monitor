@@ -53,9 +53,9 @@ def login():
         return render_template('login.html')
 
 
-@app.route("/download/<host>/<date>/<filename>")
-def download_file(host, date, filename):
-    file_path = BASE_DIR / host / date / filename
+@app.route("/download/<host>/<date>/<user>/<filename>")
+def download_file(host, date, user, filename):
+    file_path = BASE_DIR / host / date / user / filename
     if file_path.exists():
         return send_file(file_path, as_attachment=True)
     return "File not found", 404
@@ -76,63 +76,64 @@ def data():
 @app.route("/index", methods=["GET", "POST"])
 def index():
     info = get_space()
-    if request.method == "GET":
-        data = {}
-        sum = 0
-        vsum = 0
 
-        for host_dir in BASE_DIR.iterdir():
-            if host_dir.is_dir():
-                host_info = {}
-                total_host_size = 0.0
-                total_video_size = 0.0
+    data = {}
+    total_screens = 0
+    total_videos = 0
 
-                for date_dir in host_dir.iterdir():
-                    if date_dir.is_dir():
+    for host_dir in BASE_DIR.iterdir():
+        if not host_dir.is_dir():
+            continue
 
-                        # Collect screenshot files
-                        files = list(date_dir.glob("*.jpg"))
+        host_data = {}
 
-                        # Collect video files
-                        videofiles = list(date_dir.glob("*.mp4"))
+        for date_dir in host_dir.iterdir():
+            if not date_dir.is_dir():
+                continue
 
-                        # Calculate folder sizes
-                        size_mb = get_folder_size(files)
-                        vsize_mb = get_folder_size(videofiles)
+            date_data = {}
 
-                        sum += size_mb
-                        vsum += vsize_mb
+            for user_dir in date_dir.iterdir():
+                if not user_dir.is_dir():
+                    continue
 
-                        total_host_size += size_mb
-                        total_video_size += vsize_mb
+                # Collect files
+                screens = list(user_dir.glob("*.jpg"))
+                videos = list(user_dir.glob("*.mp4"))
 
-                        host_info[date_dir.name] = {
-                            "screens": {
-                                "files": [f.name for f in files],
-                                "size": f"{size_mb:.2f} MB",
-                                "count": len(files),
-                            },
-                            "videos": {
-                                "files": [f.name for f in videofiles],
-                                "size": f"{vsize_mb:.2f} MB",
-                                "count": len(videofiles),
-                            }
-                        }
+                screen_size = get_folder_size(screens)
+                video_size = get_folder_size(videos)
 
-                data[host_dir.name] = {
-                    "dates": host_info,
-                    "total_screenshots_size": f"{total_host_size:.2f} MB",
-                    "total_video_size": f"{total_video_size:.2f} MB",
+                total_screens += screen_size
+                total_videos += video_size
+
+                date_data[user_dir.name] = {
+                    "screens": {
+                        "files": [f.name for f in screens],
+                        "count": len(screens),
+                        "size": f"{screen_size:.2f} MB"
+                    },
+                    "videos": {
+                        "files": [f.name for f in videos],
+                        "count": len(videos),
+                        "size": f"{video_size:.2f} MB"
+                    }
                 }
 
-        return render_template(
-            "index.html",
-            data=data,
-            sum=round(sum, 2),
-            vsum=round(vsum, 2),
-            info=info,
-            host=host
-        )
+            host_data[date_dir.name] = date_data
+
+        data[host_dir.name] = host_data
+
+    return render_template(
+        "index.html",
+        data=data,
+        sum=round(total_screens, 2),
+        vsum=round(total_videos, 2),
+        info=info,
+        host=host
+    )
+
+
 @app.route("/upload", methods=["POST"])
 def upload():
     return upload_screenshot()
@@ -143,30 +144,38 @@ def upload_screenshot():
     if not uploaded_file:
         return jsonify({"error": "No file uploaded"}), 400
 
-    # Expect filename format: hostname/YYYY-MM-DD/HHMMSS.jpg
+    # Now expecting:
+    # hostname / date / username / filename.jpg
     original_name = uploaded_file.filename
     print("Received filename:", original_name)
 
-    if "/" in original_name:
-        hostname, today_date, filename = original_name.split("/", 2)
-    else:
-        hostname = "unknown_host"
-        filename = original_name
-        today_date = ""
+    parts = original_name.split("/")
 
-    # Build full path
-    file_path = BASE_DIR / hostname
-    if today_date:
-        file_path = file_path / today_date
-    file_path.mkdir(parents=True, exist_ok=True)  # make sure folders exist
+    if len(parts) == 4:
+        hostname, today_date, username, filename = parts
+    elif len(parts) == 3:
+        # older client format: hostname/date/filename
+        hostname, today_date, filename = parts
+        username = "unknown"
+    else:
+        # fallback
+        hostname = "unknown_host"
+        today_date = ""
+        username = "unknown"
+        filename = original_name
+
+    # Build path: BASE_DIR/hostname/date/username/
+    file_path = BASE_DIR / hostname / today_date / username
+    file_path.mkdir(parents=True, exist_ok=True)
 
     file_path = file_path / filename
 
-    # Save file
     uploaded_file.save(file_path)
-    print(f"Saved screenshot from {hostname}: {file_path}")
+
+    print(f"Saved screenshot: {file_path}")
 
     return jsonify({"status": "ok"}), 200
+
 def get_space():
     total, used, free = shutil.disk_usage(BASE_DIR)
     percent = round(used / total * 100, 1)
