@@ -12,8 +12,8 @@ import mss
 from PIL import Image
 from pynput import mouse, keyboard
 
-# CENTRAL_ENV_PATH = r"\\dc-1\Install\GPO\monitor\.env"
-CENTRAL_ENV_PATH = r"C:\Users\admin.AD\PycharmProjects\test\.env"
+CENTRAL_ENV_PATH = r"\\dc-1\Install\GPO\monitor\.env"
+# CENTRAL_ENV_PATH = r"C:\Users\admin.AD\PycharmProjects\test\.env"
 
 if os.path.exists(CENTRAL_ENV_PATH):
     load_dotenv(dotenv_path=CENTRAL_ENV_PATH)
