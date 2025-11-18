@@ -19,7 +19,7 @@ for host_dir in BASE_DIR.iterdir():
 
                 print(f"Found Directory: {date_dir}")
                 print("_____________________________")
-
+### Creating videofiles ###
                 images = sorted(date_dir.glob("*.jpg"))
 
                 if not images:
@@ -41,7 +41,7 @@ for host_dir in BASE_DIR.iterdir():
 
                 print("✅ Video created at:", video_path)
 
-                # Delete all jpg files
+### Delete all jpg files ####
                 for file in image_files:
                     path = Path(file)
                     if path.exists():
@@ -49,6 +49,7 @@ for host_dir in BASE_DIR.iterdir():
                         print("Deleted:", path)
                     else:
                         print("Not found:", path)
+### Delete old video files ###
 
 
 
