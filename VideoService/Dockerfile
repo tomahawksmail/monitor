@@ -1,0 +1,23 @@
+FROM python:3.14-slim
+ENV TZ=America/Los_Angeles
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libssl-dev \
+    gcc \
+    tzdata \
+    libpq-dev && \
+    rm -rf /var/lib/apt/lists/*
+# Set timezone
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+# Upgrade pip
+RUN pip install --upgrade pip --no-cache-dir
+# Set working directory
+WORKDIR /app
+# Copy requirements file first to leverage Docker caching
+COPY requirements.txt /app/
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+# Copy application code
+COPY VideoService/ /app/
+# Command to run the application
+CMD ["python", "videoservice.py"]
