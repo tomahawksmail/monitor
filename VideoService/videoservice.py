@@ -2,17 +2,15 @@ from moviepy import ImageSequenceClip
 from pathlib import Path
 import platform
 import time
-from server import TTL  # days to keep videos
 
 # Detect base path
 if platform.system() == "Windows":
-    BASE_DIR = Path(r"C:\Users\admin.AD\PycharmProjects\test\screenshots")
+    BASE_DIR = Path(r"/screenshots")
 else:
     BASE_DIR = Path("/app/screenshots")
     BASE_DIR.mkdir(parents=True, exist_ok=True)
 
-TTL_SECONDS = int(TTL) * 24 * 60 * 60   # days → seconds
-
+TTL_SECONDS = 5 * 24 * 60 * 60   # days → seconds
 
 # -------------------------------------------------------------
 #            CREATE VIDEO FOR ONE USER DIRECTORY
@@ -66,7 +64,7 @@ def delete_images(images):
 # -------------------------------------------------------------
 def delete_old_videos():
     now = time.time()
-    print(f"\n=== Checking for old videos (TTL={TTL} days) ===")
+
 
     for mp4 in BASE_DIR.rglob("*.mp4"):
         age = now - mp4.stat().st_mtime

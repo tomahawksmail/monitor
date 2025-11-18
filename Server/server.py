@@ -8,7 +8,7 @@ import platform
 
 load_dotenv()
 TTL=os.environ.get("TTLVIDEO")
-from ldap_utils import ldap_auth, is_user_in_group
+from Server.ldap_utils import ldap_auth, is_user_in_group
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(16))
@@ -18,7 +18,7 @@ host = platform.uname()[1]
 
 
 if platform.system() == "Windows":
-    BASE_DIR = Path(r"C:\Users\admin.AD\PycharmProjects\test\screenshots")
+    BASE_DIR = Path(r"/screenshots")
 else:
     BASE_DIR = Path("/app/screenshots")
     BASE_DIR.mkdir(parents=True, exist_ok=True)
