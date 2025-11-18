@@ -2,12 +2,9 @@ version: "3.8"
 
 services:
   monitor_server:
-    image: dregistrygui.uskoinc.com/monitor-server:1.6
+    image: dregistrygui.uskoinc.com/monitor-server:1.75
     deploy:
       replicas: 4
-#      placement:
-#        constraints:
-#          - node.hostname == masterswarm
       restart_policy:
         condition: on-failure
       resources:
@@ -21,12 +18,3 @@ services:
         mode: ingress
     volumes:
       - /mnt/nfs/shared/monitor:/app/screenshots
-
-#volumes:
-#  monitor_data:
-#    driver: local
-#    driver_opts:
-#      type: "nfs"
-#      o: "addr=192.168.17.220,rw"
-#      device: ":/mnt/nfs/shared/monitor"
-

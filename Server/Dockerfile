@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.14-slim
 ENV TZ=America/Los_Angeles
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -18,7 +18,7 @@ COPY requirements.txt /app/
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
-COPY .. /app/
+COPY Server/ /app/
 # Expose application ports
 EXPOSE 5566
 # Command to run the application

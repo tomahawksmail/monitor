@@ -7,7 +7,6 @@ import shutil
 import platform
 
 load_dotenv()
-TTL=os.environ.get("TTLVIDEO")
 from Server.ldap_utils import ldap_auth, is_user_in_group
 
 app = Flask(__name__)
@@ -144,8 +143,6 @@ def upload_screenshot():
     if not uploaded_file:
         return jsonify({"error": "No file uploaded"}), 400
 
-    # Now expecting:
-    # hostname / date / username / filename.jpg
     original_name = uploaded_file.filename
     print("Received filename:", original_name)
 
@@ -189,5 +186,5 @@ def get_folder_size(files):
     """Return total size (MB) of all given files."""
     return sum(f.stat().st_size for f in files) / (1024 * 1024)
 
-if __name__ == "__main__":
-    app.run(host="192.168.11.79", port=5566)
+# if __name__ == "__main__":
+#     app.run(host="192.168.11.79", port=5566)
