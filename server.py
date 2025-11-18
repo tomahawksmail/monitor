@@ -71,33 +71,64 @@ def index():
     if request.method == "GET":
         data = {}
         sum = 0
+        vsum = 0
+
         for host_dir in BASE_DIR.iterdir():
             if host_dir.is_dir():
                 host_info = {}
                 total_host_size = 0.0
+                total_video_size = 0.0
 
                 for date_dir in host_dir.iterdir():
                     if date_dir.is_dir():
+
+                        # Collect screenshot files
                         files = list(date_dir.glob("*.jpg"))
+
+                        # Collect video files
+                        videofiles = list(date_dir.glob("*.mp4"))
+
+                        # Calculate folder sizes
                         size_mb = get_folder_size(files)
-                        sum = sum + size_mb
+                        vsize_mb = get_folder_size(videofiles)
+
+                        sum += size_mb
+                        vsum += vsize_mb
+
                         total_host_size += size_mb
+                        total_video_size += vsize_mb
 
                         host_info[date_dir.name] = {
-                            "files": [f.name for f in files],
-                            "size": f"{size_mb:.2f} MB",
-                            "count": len(files),
+                            "screens": {
+                                "files": [f.name for f in files],
+                                "size": f"{size_mb:.2f} MB",
+                                "count": len(files),
+                            },
+                            "videos": {
+                                "files": [f.name for f in videofiles],
+                                "size": f"{vsize_mb:.2f} MB",
+                                "count": len(videofiles),
+                            }
                         }
 
                 data[host_dir.name] = {
                     "dates": host_info,
-                    "total_size": f"{total_host_size:.2f} MB",
+                    "total_screenshots_size": f"{total_host_size:.2f} MB",
+                    "total_video_size": f"{total_video_size:.2f} MB",
                 }
 
-        return render_template("index.html", data=data, sum=round(sum, 2), info=info, host=host)
-
-
+        return render_template(
+            "index.html",
+            data=data,
+            sum=round(sum, 2),
+            vsum=round(vsum, 2),
+            info=info,
+            host=host
+        )
 @app.route("/upload", methods=["POST"])
+def upload():
+    return upload_screenshot()
+
 def upload_screenshot():
 
     uploaded_file = request.files.get("file")
@@ -128,8 +159,6 @@ def upload_screenshot():
     print(f"Saved screenshot from {hostname}: {file_path}")
 
     return jsonify({"status": "ok"}), 200
-
-
 def get_space():
     total, used, free = shutil.disk_usage(BASE_DIR)
     percent = round(used / total * 100, 1)

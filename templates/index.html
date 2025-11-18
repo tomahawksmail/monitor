@@ -25,51 +25,89 @@
     </script>
 </head>
 <body>
+
 <h2 style="display: flex; justify-content: space-between; align-items: center;">
     📁 Screenshot Directory Viewer
     <a href="{{ url_for('logout') }}" class="logout-button">🔒 Logout</a>
 </h2>
 
 
+<!-- ====================== HOST LOOP ====================== -->
 {% for host, info in data.items() %}
 <details class="level-0">
     <summary>
         🖥️ {{ host }}
         <span class="host-total">
-                    | Total: {{ info.total_files }} files — {{ info.total_size }}
-                </span>
+            | Screenshots Total: {{ info.total_screenshots_size }}
+            | Videos Total: {{ info.total_video_size }}
+        </span>
     </summary>
 
+    <!-- ====================== DATE LOOP ====================== -->
     {% for date, d in info.dates.items() %}
+
+    <!-- Screenshots -->
     <details class="level-1">
         <summary class="date-summary">
-            📅 {{ date }} — {{ d.count }} files ({{ d.size }}) --- link
+            📅 {{ date }} — {{ d.screens.count }} captured files ({{ d.screens.size }})
+            ▶️  ({{ d.videos.size }})
         </summary>
         <ul class="level-2">
-            {% for file in d.files %}
-            <li class="file level-3">🖼️ {{ file }}</li>
+            {% for file in d.screens.files %}
+            <li class="file">🖼️ {{ file }}</li>
+            {% endfor %}
+
+            {% for file in d.videos.files %}
+            <li class="file">🎞️ {{ file }}</li>
+
+
+
             {% endfor %}
         </ul>
     </details>
+
+<!--    &lt;!&ndash; Videos &ndash;&gt;-->
+<!--    <details class="level-1">-->
+<!--        <summary class="date-summary">-->
+<!--            ▶️ {{ date }} — {{ d.videos.count }} video file(s) ({{ d.videos.size }})-->
+<!--        </summary>-->
+<!--        <ul class="level-2">-->
+<!--            {% for file in d.videos.files %}-->
+<!--            <li class="file">🎞️ {{ file }}</li>-->
+<!--            {% endfor %}-->
+<!--        </ul>-->
+<!--    </details>-->
+
     {% endfor %}
 </details>
 {% endfor %}
 
+
+<!-- ====================== FOOTER ====================== -->
 <div class="info">
-    💾 <strong>Total:</strong> {{ grand_total_files }} size,
-    {{ sum }} MB
+    💾 <strong>Total screenshots size:</strong> {{ sum }} MB |
+    🎞️ <strong>Total video size:</strong> {{ vsum }} MB
 </div>
 
 <hr>
-<div class="footer">
 
-<div class="gauge">
-    <div class="progress-container">
-        <div class="progress-bar" style="width: {{ info.percent }}%;"> Disk Usage {{ info.percent }}%</div>
+<div class="footer">
+    <div class="gauge">
+        <div class="progress-container">
+            <div class="progress-bar" style="width: {{ info.percent }}%;">
+                Disk Usage {{ info.percent }}%
+            </div>
+        </div>
     </div>
+
+    <p>
+        <strong>Total:</strong> <span id="total">{{ info.total }} GB</span> /
+        <strong>Used:</strong> <span id="used">{{ info.used }} GB</span> /
+        <strong>Free:</strong> <span id="free">{{ info.free }} GB</span>
+    </p>
+
+    host = {{ host }}
 </div>
-    <p><strong>Total:</strong> <span id="total">{{ info.total }} GB</span> / <strong>Used:</strong> <span id="used">{{ info.used }} GB</span> / <strong>Free:</strong> <span id="free">{{ info.free }} GB</span></p>
-    host={{host}}
-</div>
+
 </body>
 </html>

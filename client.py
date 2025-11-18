@@ -12,8 +12,8 @@ import mss
 from PIL import Image
 from pynput import mouse, keyboard
 
-
-CENTRAL_ENV_PATH = r"\\dc-1\Install\GPO\monitor\.env"
+# CENTRAL_ENV_PATH = r"\\dc-1\Install\GPO\monitor\.env"
+CENTRAL_ENV_PATH = r"C:\Users\admin.AD\PycharmProjects\test\.env"
 
 if os.path.exists(CENTRAL_ENV_PATH):
     load_dotenv(dotenv_path=CENTRAL_ENV_PATH)
@@ -24,19 +24,19 @@ else:
 
 # Load settings
 load_dotenv()
-SERVER_URL = os.environ.get('API_URL')
+SERVER_URL = os.environ.get('API_URL')  # e.g. http://192.168.11.79:5566/upload
+print("Using API:", SERVER_URL)
+
 INTERVAL = int(os.environ.get('FREQUENCY', 5))
 QUALITY = int(os.environ.get('QUALITY', 70))
 VERSION = os.getenv("VERSION", "unknown")
 hostname = platform.node() or "unknown_host"
 
-
-# Flag to track user activity
+# Activity flag
 user_active = False
 
-# Mouse and keyboard listeners
+# Mouse & keyboard listeners
 def on_mouse_move(x, y):
-    # print("Mouse moved")
     global user_active
     user_active = True
 
@@ -45,19 +45,14 @@ def on_mouse_click(x, y, button, pressed):
     user_active = True
 
 def on_key_press(key):
-    # print("key pressed")
     global user_active
     user_active = True
-
-
-def on_key_combination():
-    print("Key combination 'ctrl+shift+a' pressed!")
 
 
 mouse_listener = mouse.Listener(on_move=on_mouse_move, on_click=on_mouse_click)
 keyboard_listener = keyboard.Listener(on_press=on_key_press)
 mouse_listener.start()
-
+keyboard_listener.start()
 
 
 print(f"[INFO] Client started for host: {hostname}")
@@ -67,8 +62,8 @@ try:
         if user_active:
             timestamp = datetime.now().strftime("%H-%M-%S")
             today_date = datetime.now().strftime("%Y-%m-%d")
+
             with mss.mss() as sct:
-                # Capture all monitors
                 screenshot = sct.grab(sct.monitors[0])
                 img = Image.frombytes("RGB", screenshot.size, screenshot.rgb)
 
@@ -76,22 +71,27 @@ try:
                 img.save(img_bytes, format="JPEG", quality=QUALITY)
                 img_bytes.seek(0)
 
+                # IMPORTANT — no slashes inside filename
                 filename = f"{hostname}/{today_date}/{timestamp}.jpg"
+
                 files = {'file': (filename, img_bytes, 'image/jpeg')}
 
-                try:
-                    r = requests.post(SERVER_URL, files=files, timeout=10)
-                    print(f"[{timestamp}] Uploaded {filename}: {r.status_code}")
-                except Exception as e:
-                    print(f"[{timestamp}] Error uploading {filename}: {e}")
+                # send folder info separately
+                data = {
+                    "hostname": hostname,
+                    "date": today_date
+                }
 
-            # Reset activity flag
+                try:
+                    r = requests.post(SERVER_URL, files=files, data=data, timeout=10)
+                    print(f"[{timestamp}] Uploaded OK ({r.status_code})")
+                except Exception as e:
+                    print(f"[{timestamp}] Upload ERROR: {e}")
+
+            # reset flag
             user_active = False
 
         time.sleep(INTERVAL)
 
 except KeyboardInterrupt:
     print("Client stopped.")
-
-
-

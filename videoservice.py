@@ -1,6 +1,5 @@
 from moviepy import ImageSequenceClip
 from pathlib import Path
-import os
 import platform
 
 
@@ -42,6 +41,7 @@ for host_dir in BASE_DIR.iterdir():
 
                 print("✅ Video created at:", video_path)
 
+                # Delete all jpg files
                 for file in image_files:
                     path = Path(file)
                     if path.exists():
