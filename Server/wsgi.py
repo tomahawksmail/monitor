@@ -1,5 +1,5 @@
 #####################################################
-    ### Designed by Maksym Tsybulskyi, 2024 ###
+    ### Designed by Maksym Tsybulskyi, 2025 ###
 #####################################################
 
 from server import app
