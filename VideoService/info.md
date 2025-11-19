@@ -7,5 +7,5 @@ crontab -e
 ```
 30 2 * * * /usr/bin/docker run --rm -v /mnt/nfs/shared/monitor:/app/screenshots videoservice:1.0
 ```
-which docker
+
 
