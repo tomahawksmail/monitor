@@ -1,0 +1,5 @@
+DOMAIN_CONTROLLER=ad.domainname.com
+DCUSERNAME=ad\serviceaccount
+DCPASSWORD=MegaPassword
+LDAP_GROUP_DN=CN=Allow-Monitor,OU=Users,DC=ad,DC=domainname,DC=com
+FLASK_SECRET_KEY=SecretString
