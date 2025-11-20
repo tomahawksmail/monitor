@@ -18,7 +18,7 @@ COPY requirements.txt /app/
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
-COPY Server/ /app/
+COPY . /app/
 # Expose application ports
 EXPOSE 5566
 # Command to run the application
