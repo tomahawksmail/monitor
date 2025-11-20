@@ -1,14 +1,9 @@
 from flask import Flask, request, jsonify, render_template, flash, redirect, url_for, session, send_file
-
 from pathlib import Path
-import os
-# from dotenv import load_dotenv
 import shutil
 import platform
 from datetime import datetime
 from ldap_utils import ldap_auth, is_user_in_group, KEY
-
-# load_dotenv()
 
 
 app = Flask(__name__)
