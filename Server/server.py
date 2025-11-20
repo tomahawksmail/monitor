@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 import shutil
 import platform
+from datetime import datetime
 
 load_dotenv()
 from Server.ldap_utils import ldap_auth, is_user_in_group
@@ -72,6 +73,14 @@ def data():
     return jsonify(get_space())
 
 
+def safe_date_parse(name):
+    """Try to parse folder name as date. Fallback: lexical sort."""
+    try:
+        return datetime.strptime(name, "%Y-%m-%d")
+    except:
+        return name  # fallback for non-date folder names
+
+
 @app.route("/index", methods=["GET", "POST"])
 def index():
     info = get_space()
@@ -80,23 +89,32 @@ def index():
     total_screens = 0
     total_videos = 0
 
-    for host_dir in BASE_DIR.iterdir():
-        if not host_dir.is_dir():
-            continue
+    # Sort host directories by name (or modify if needed)
+    host_dirs = sorted(
+        [d for d in BASE_DIR.iterdir() if d.is_dir()],
+        key=lambda d: d.name
+    )
 
+    for host_dir in host_dirs:
         host_data = {}
 
-        for date_dir in host_dir.iterdir():
-            if not date_dir.is_dir():
-                continue
+        # Sort dates inside host
+        date_dirs = sorted(
+            [d for d in host_dir.iterdir() if d.is_dir()],
+            key=lambda d: safe_date_parse(d.name),
+            reverse=True  # newest first
+        )
 
+        for date_dir in date_dirs:
             date_data = {}
 
-            for user_dir in date_dir.iterdir():
-                if not user_dir.is_dir():
-                    continue
+            # Sort users inside date
+            user_dirs = sorted(
+                [d for d in date_dir.iterdir() if d.is_dir()],
+                key=lambda d: d.name
+            )
 
-                # Collect files
+            for user_dir in user_dirs:
                 screens = list(user_dir.glob("*.jpg"))
                 videos = list(user_dir.glob("*.mp4"))
 
@@ -108,12 +126,12 @@ def index():
 
                 date_data[user_dir.name] = {
                     "screens": {
-                        "files": [f.name for f in screens],
+                        "files": sorted([f.name for f in screens]),
                         "count": len(screens),
                         "size": f"{screen_size:.2f} MB"
                     },
                     "videos": {
-                        "files": [f.name for f in videos],
+                        "files": sorted([f.name for f in videos]),
                         "count": len(videos),
                         "size": f"{video_size:.2f} MB"
                     }
@@ -131,6 +149,66 @@ def index():
         info=info,
         host=host
     )
+
+# @app.route("/index", methods=["GET", "POST"])
+# def index():
+#     info = get_space()
+#
+#     data = {}
+#     total_screens = 0
+#     total_videos = 0
+#
+#     for host_dir in BASE_DIR.iterdir():
+#         if not host_dir.is_dir():
+#             continue
+#
+#         host_data = {}
+#
+#         for date_dir in host_dir.iterdir():
+#             if not date_dir.is_dir():
+#                 continue
+#
+#             date_data = {}
+#
+#             for user_dir in date_dir.iterdir():
+#                 if not user_dir.is_dir():
+#                     continue
+#
+#                 # Collect files
+#                 screens = list(user_dir.glob("*.jpg"))
+#                 videos = list(user_dir.glob("*.mp4"))
+#
+#                 screen_size = get_folder_size(screens)
+#                 video_size = get_folder_size(videos)
+#
+#                 total_screens += screen_size
+#                 total_videos += video_size
+#
+#                 date_data[user_dir.name] = {
+#                     "screens": {
+#                         "files": [f.name for f in screens],
+#                         "count": len(screens),
+#                         "size": f"{screen_size:.2f} MB"
+#                     },
+#                     "videos": {
+#                         "files": [f.name for f in videos],
+#                         "count": len(videos),
+#                         "size": f"{video_size:.2f} MB"
+#                     }
+#                 }
+#
+#             host_data[date_dir.name] = date_data
+#
+#         data[host_dir.name] = host_data
+#
+#     return render_template(
+#         "index.html",
+#         data=data,
+#         sum=round(total_screens, 2),
+#         vsum=round(total_videos, 2),
+#         info=info,
+#         host=host
+#     )
 
 
 @app.route("/upload", methods=["POST"])
