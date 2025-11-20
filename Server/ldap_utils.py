@@ -1,11 +1,17 @@
 from ldap3 import Server, Connection, NTLM, ALL
 import os
+from dotenv import load_dotenv
+load_dotenv()
+DOMAIN_CONTROLLER = os.environ.get("DOMAIN_CONTROLLER")
 
-DOMAIN_CONTROLLER = os.environ.get('DOMAIN_CONTROLLER')
+if not DOMAIN_CONTROLLER:
+    raise ValueError("DOMAIN_CONTROLLER is not set. Please configure environment variable.")
+
 SERVICE_USER = os.environ.get('DCUSERNAME')
 SERVICE_PASS = os.environ.get('DCPASSWORD')
 LDAP_GROUP_DN = os.environ.get('LDAP_GROUP_DN',
                                "CN=Allow-Monitor,OU=CA_Office_Users,DC=ad,DC=uskoinc,DC=com")
+
 
 
 def user_dn(username):

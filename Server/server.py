@@ -6,9 +6,10 @@ from dotenv import load_dotenv
 import shutil
 import platform
 from datetime import datetime
+from ldap_utils import ldap_auth, is_user_in_group
 
 load_dotenv()
-from Server.ldap_utils import ldap_auth, is_user_in_group
+
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(16))
@@ -149,66 +150,6 @@ def index():
         info=info,
         host=host
     )
-
-# @app.route("/index", methods=["GET", "POST"])
-# def index():
-#     info = get_space()
-#
-#     data = {}
-#     total_screens = 0
-#     total_videos = 0
-#
-#     for host_dir in BASE_DIR.iterdir():
-#         if not host_dir.is_dir():
-#             continue
-#
-#         host_data = {}
-#
-#         for date_dir in host_dir.iterdir():
-#             if not date_dir.is_dir():
-#                 continue
-#
-#             date_data = {}
-#
-#             for user_dir in date_dir.iterdir():
-#                 if not user_dir.is_dir():
-#                     continue
-#
-#                 # Collect files
-#                 screens = list(user_dir.glob("*.jpg"))
-#                 videos = list(user_dir.glob("*.mp4"))
-#
-#                 screen_size = get_folder_size(screens)
-#                 video_size = get_folder_size(videos)
-#
-#                 total_screens += screen_size
-#                 total_videos += video_size
-#
-#                 date_data[user_dir.name] = {
-#                     "screens": {
-#                         "files": [f.name for f in screens],
-#                         "count": len(screens),
-#                         "size": f"{screen_size:.2f} MB"
-#                     },
-#                     "videos": {
-#                         "files": [f.name for f in videos],
-#                         "count": len(videos),
-#                         "size": f"{video_size:.2f} MB"
-#                     }
-#                 }
-#
-#             host_data[date_dir.name] = date_data
-#
-#         data[host_dir.name] = host_data
-#
-#     return render_template(
-#         "index.html",
-#         data=data,
-#         sum=round(total_screens, 2),
-#         vsum=round(total_videos, 2),
-#         info=info,
-#         host=host
-#     )
 
 
 @app.route("/upload", methods=["POST"])
