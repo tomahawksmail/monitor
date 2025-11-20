@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   monitor_server:
-    image: dregistrygui.uskoinc.com/monitor-server:1.75
+    image: dregistrygui.uskoinc.com/monitor-server:1.76
     deploy:
       replicas: 4
       restart_policy:
