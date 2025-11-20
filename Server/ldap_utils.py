@@ -4,8 +4,10 @@ from dotenv import load_dotenv
 load_dotenv()
 DOMAIN_CONTROLLER = os.environ.get("DOMAIN_CONTROLLER")
 
+
 if not DOMAIN_CONTROLLER:
     raise ValueError("DOMAIN_CONTROLLER is not set. Please configure environment variable.")
+
 
 SERVICE_USER = os.environ.get('DCUSERNAME')
 SERVICE_PASS = os.environ.get('DCPASSWORD')
