@@ -1,18 +1,18 @@
 from flask import Flask, request, jsonify, render_template, flash, redirect, url_for, session, send_file
-import secrets
+
 from pathlib import Path
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import shutil
 import platform
 from datetime import datetime
-from ldap_utils import ldap_auth, is_user_in_group
+from ldap_utils import ldap_auth, is_user_in_group, KEY
 
-load_dotenv()
+# load_dotenv()
 
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(16))
+app.secret_key = KEY
 
 
 host = platform.uname()[1]
