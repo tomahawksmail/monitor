@@ -19,7 +19,6 @@ else:
     BASE_DIR = Path("/app/screenshots")
     BASE_DIR.mkdir(parents=True, exist_ok=True)
 
-
 @app.route("/")
 def home():
     if "username" not in session:
