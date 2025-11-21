@@ -96,7 +96,7 @@
 
     <p>
         <strong>Total:</strong> <span id="total">{{ info.total }} GB</span> /
-        <strong>Used:</strong> <span id="used">{{ info.used }} GB</span> /
+        <strong>Used:</strong> <span id="used">{% set total = sum + vsum %}{{ total < 1024 and (total ~ ' MB') or (round(total / 1024, 2) ~ ' GB') }}</span>
         <strong>Free:</strong> <span id="free">{{ info.free }} GB</span>
     </p>
 
