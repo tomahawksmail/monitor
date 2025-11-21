@@ -187,8 +187,7 @@ def upload_screenshot():
     return jsonify({"status": "ok"}), 200
 
 def get_space():
-    total, used, free = shutil.disk_usage("/mnt/nfs/nfs-server")
-    print(f"Total: {total}, Used: {used}, Free: {free}")
+    total, used, free = shutil.disk_usage(BASE_DIR)
     percent = round(used / total * 100, 1)
     return {
         "total": round(total / (1024 ** 3), 2),
@@ -202,3 +201,4 @@ def get_folder_size(files):
 
 # if __name__ == "__main__":
 #     app.run(host="192.168.11.79", port=5566)
+
