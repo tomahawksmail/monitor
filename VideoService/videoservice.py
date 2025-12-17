@@ -10,7 +10,7 @@ else:
     BASE_DIR = Path("/app/screenshots")
     BASE_DIR.mkdir(parents=True, exist_ok=True)
 
-TTL_SECONDS = 5 * 24 * 60 * 60   # days → seconds
+TTL_SECONDS = 30 * 24 * 60 * 60   # days → seconds
 
 # -------------------------------------------------------------
 #            CREATE VIDEO FOR ONE USER DIRECTORY
